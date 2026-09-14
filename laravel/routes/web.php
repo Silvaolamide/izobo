@@ -15,5 +15,6 @@ Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.logi
 Route::redirect('/admin', '/admin/login');
 Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
     Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
 });
