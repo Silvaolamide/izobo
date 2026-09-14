@@ -31,7 +31,7 @@ class JoinController extends Controller
     {
         $data = $request->validate([
             'full_name' => ['required','string','min:2','max:120'],
-            'phone' => ['required','string','min:7','max:30'],
+            'phone' => ['required','string','min:7','max:30','unique:registrations,phone'],
             'email' => ['nullable','email','max:190'],
             'state_id' => ['required','string','max:100'],
             'lga_id' => ['required','string','max:100'],
@@ -66,8 +66,39 @@ class JoinController extends Controller
             return $name === $target || $name === $target . ' state' || Str::slug($item->name) === Str::slug($stateName);
         });
 
-        $lga = $state?->lgas()->get()->first(fn ($item) => Str::slug($item->name) === Str::slug($lgaName));
-        $ward = $lga?->wards()->get()->first(fn ($item) => Str::slug($item->name) === Str::slug($wardName));
+        // Match administrative names robustly because the external location
+        // dataset may use Roman numerals while the registration database
+        // uses Arabic numerals (e.g. "Emai I" vs "EMAI 1").
+        $normalizeLocationName = function ($name) {
+            $name = Str::lower(trim((string) $name));
+
+            $romanToArabic = [
+                '\\biii\\b' => '3',
+                '\\bii\\b' => '2',
+                '\\biv\\b' => '4',
+                '\\bv\\b' => '5',
+                '\\bvi\\b' => '6',
+                '\\bvii\\b' => '7',
+                '\\bviii\\b' => '8',
+                '\\bix\\b' => '9',
+                '\\bx\\b' => '10',
+                '\\bi\\b' => '1',
+            ];
+
+            foreach ($romanToArabic as $pattern => $replacement) {
+                $name = preg_replace('/' . $pattern . '/i', $replacement, $name);
+            }
+
+            return Str::slug($name);
+        };
+
+        $lga = $state?->lgas()->get()->first(
+            fn ($item) => $normalizeLocationName($item->name) === $normalizeLocationName($lgaName)
+        );
+
+        $ward = $lga?->wards()->get()->first(
+            fn ($item) => $normalizeLocationName($item->name) === $normalizeLocationName($wardName)
+        );
 
         abort_unless($state && $lga && $ward, 422, 'The selected location is not available in the registration database.');
 
@@ -82,6 +113,8 @@ class JoinController extends Controller
 
         Registration::create($data);
 
-        return back()->with('success', 'Thank you. Your registration has been received.');
+        return redirect()
+            ->route('join')
+            ->with('registration_complete', true);
     }
 }

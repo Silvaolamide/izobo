@@ -12,26 +12,39 @@
       @if(session('success'))<div class="notice" role="status">{{ session('success') }}</div>@endif
       @if($errors->any())<div class="notice" style="background:#fff1f1;color:#8d2026" role="alert">Please check the highlighted information and try again.</div>@endif
 
-      <form method="POST" action="{{ route('join.store') }}" style="margin-top:28px">
-        @csrf
-        <div class="grid">
-          <div class="field"><label for="full_name">Full name</label><input id="full_name" name="full_name" value="{{ old('full_name') }}" autocomplete="name" required>@error('full_name')<div class="error">{{ $message }}</div>@enderror</div>
-          <div class="field"><label for="phone">Phone number</label><input id="phone" name="phone" value="{{ old('phone') }}" type="tel" autocomplete="tel" required>@error('phone')<div class="error">{{ $message }}</div>@enderror</div>
+      @if(session('registration_complete'))
+        <div style="margin-top:30px;padding:32px;border-radius:18px;background:#f0f8f2;border:1px solid #cde5d2">
+          <div style="font-size:42px;line-height:1;margin-bottom:18px">✓</div>
+          <h2 style="font:800 30px/1.1 Manrope;margin:0 0 12px;color:var(--green)">
+            You're already registered.
+          </h2>
+          <p class="muted" style="margin:0;max-width:580px">
+            Thank you for registering your interest in supporting the IZOBO campaign.
+            Your registration has been received by the campaign team.
+          </p>
         </div>
-        <div class="field"><label for="email">Email <span style="font-weight:400;color:var(--muted)">(optional)</span></label><input id="email" name="email" value="{{ old('email') }}" type="email" autocomplete="email">@error('email')<div class="error">{{ $message }}</div>@enderror</div>
+      @else
+        <form method="POST" action="{{ route('join.store') }}" style="margin-top:28px">
+          @csrf
+          <div class="grid">
+            <div class="field"><label for="full_name">Full name</label><input id="full_name" name="full_name" value="{{ old('full_name') }}" autocomplete="name" required>@error('full_name')<div class="error">{{ $message }}</div>@enderror</div>
+            <div class="field"><label for="phone">Phone number</label><input id="phone" name="phone" value="{{ old('phone') }}" type="tel" autocomplete="tel" required>@error('phone')<div class="error">{{ $message }}</div>@enderror</div>
+          </div>
+          <div class="field"><label for="email">Email <span style="font-weight:400;color:var(--muted)">(optional)</span></label><input id="email" name="email" value="{{ old('email') }}" type="email" autocomplete="email">@error('email')<div class="error">{{ $message }}</div>@enderror</div>
 
-        <div style="margin-top:30px;padding-top:25px;border-top:1px solid var(--line)"><p style="font-weight:800;margin:0">Your location</p><p class="muted" style="font-size:13px;margin:5px 0 0">Select each option. The next list updates automatically.</p></div>
-        <div class="grid">
-          <div class="field"><label for="state_id">State</label><select id="state_id" name="state_id" required><option value="">Loading states…</option></select></div>
-          <div class="field"><label for="lga_id">LGA</label><select id="lga_id" name="lga_id" required disabled><option value="">Select LGA</option></select></div>
-        </div>
-        <div class="field"><label for="ward_id">Ward</label><select id="ward_id" name="ward_id" required disabled><option value="">Select Ward</option></select></div>
+          <div style="margin-top:30px;padding-top:25px;border-top:1px solid var(--line)"><p style="font-weight:800;margin:0">Your location</p><p class="muted" style="font-size:13px;margin:5px 0 0">Select each option. The next list updates automatically.</p></div>
+          <div class="grid">
+            <div class="field"><label for="state_id">State</label><select id="state_id" name="state_id" required><option value="">Loading states…</option></select></div>
+            <div class="field"><label for="lga_id">LGA</label><select id="lga_id" name="lga_id" required disabled><option value="">Select LGA</option></select></div>
+          </div>
+          <div class="field"><label for="ward_id">Ward</label><select id="ward_id" name="ward_id" required disabled><option value="">Select Ward</option></select></div>
 
-        <div class="field"><label for="interest">How would you like to participate?</label><select id="interest" name="interest" required><option value="">Select one</option>@foreach(['Volunteer','Campaign supporter','Community outreach','Digital/media support','Other'] as $interest)<option @selected(old('interest')===$interest)>{{ $interest }}</option>@endforeach</select></div>
-        <label style="display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:13px;line-height:1.5"><input type="checkbox" name="consent" value="1" required style="margin-top:3px"> I agree that the campaign team may use the information I submit for campaign coordination and communication.</label>
-        @error('consent')<div class="error">{{ $message }}</div>@enderror
-        <button class="btn" type="submit" style="width:100%;margin-top:24px">Register my interest</button>
-      </form>
+          <div class="field"><label for="interest">How would you like to participate?</label><select id="interest" name="interest" required><option value="">Select one</option>@foreach(['Volunteer','Campaign supporter','Community outreach','Digital/media support','Other'] as $interest)<option @selected(old('interest')===$interest)>{{ $interest }}</option>@endforeach</select></div>
+          <label style="display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:13px;line-height:1.5"><input type="checkbox" name="consent" value="1" required style="margin-top:3px"> I agree that the campaign team may use the information I submit for campaign coordination and communication.</label>
+          @error('consent')<div class="error">{{ $message }}</div>@enderror
+          <button class="btn" type="submit" style="width:100%;margin-top:24px">Register my interest</button>
+        </form>
+      @endif
     </div>
   </div>
 </main>
