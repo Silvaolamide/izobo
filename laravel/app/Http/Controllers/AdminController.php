@@ -51,6 +51,92 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('total','today','week','month','byLga','byWard','byInterest','daily','whatsappGroupLink'));
     }
 
+    public function registrations(Request $request)
+    {
+        $query = Registration::query()->with(['state', 'lga', 'ward']);
+
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('state_id')) {
+            $query->where('state_id', $request->input('state_id'));
+        }
+
+        if ($request->filled('lga_id')) {
+            $query->where('lga_id', $request->input('lga_id'));
+        }
+
+        if ($request->filled('ward_id')) {
+            $query->where('ward_id', $request->input('ward_id'));
+        }
+
+        if ($request->filled('interest')) {
+            $query->where('interest', $request->input('interest'));
+        }
+
+        $registrations = $query->latest('created_at')->paginate(25)->withQueryString();
+        $states = State::query()->orderBy('name')->get(['id', 'name']);
+        $lgas = Lga::query()->orderBy('name')->get(['id', 'name', 'state_id']);
+        $wards = Ward::query()->orderBy('name')->get(['id', 'name', 'lga_id']);
+
+        return view('admin.registrations', compact('registrations', 'states', 'lgas', 'wards'));
+    }
+
+    public function exportRegistrations(Request $request)
+    {
+        $query = Registration::query()->with(['state', 'lga', 'ward']);
+
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        foreach (['state_id', 'lga_id', 'ward_id', 'interest'] as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, $request->input($filter));
+            }
+        }
+
+        $registrations = $query->latest('created_at')->get();
+        $filename = 'izobo-registrations-' . now()->format('Y-m-d-His') . '.csv';
+
+        return response()->streamDownload(function () use ($registrations) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'ID', 'Full Name', 'Phone', 'Email', 'State', 'LGA', 'Ward',
+                'Interest', 'Consent', 'Registered At',
+            ]);
+
+            foreach ($registrations as $registration) {
+                fputcsv($handle, [
+                    $registration->id,
+                    $registration->full_name,
+                    $registration->phone,
+                    $registration->email,
+                    $registration->state?->name,
+                    $registration->lga?->name,
+                    $registration->ward?->name,
+                    $registration->interest,
+                    $registration->consent ? 'Yes' : 'No',
+                    optional($registration->created_at)->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
     public function updateSettings(Request $request)
     {
         $data = $request->validate([
