@@ -42,11 +42,7 @@ const state = document.getElementById('state_id');
 const lga = document.getElementById('lga_id');
 const ward = document.getElementById('ward_id');
 
-let locations = [];
-
-function label(value) {
-  return value.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+let states = [];
 
 function resetSelect(select, text) {
   select.innerHTML = '';
@@ -65,8 +61,12 @@ function populate(select, items, getValue, getLabel) {
   });
 }
 
-function populateLgas(stateKey, selectedLga = '') {
-  const selectedState = locations.find(item => item.state === stateKey);
+function nameOf(item) {
+  return item?.name?.en || item?.name?.local || '';
+}
+
+function populateLgas(stateId, selectedLga = '', selectedWard = '') {
+  const selectedState = states.find(item => item.id === stateId);
   resetSelect(lga, 'Select LGA');
   resetSelect(ward, 'Select Ward');
   ward.disabled = true;
@@ -76,18 +76,19 @@ function populateLgas(stateKey, selectedLga = '') {
     return;
   }
 
-  populate(lga, selectedState.lgas, item => item.lga, item => label(item.lga));
+  const lgas = selectedState.lga || [];
+  populate(lga, lgas, item => item.id, item => nameOf(item));
   lga.disabled = false;
 
-  if (selectedLga && selectedState.lgas.some(item => item.lga === selectedLga)) {
+  if (selectedLga && lgas.some(item => item.id === selectedLga)) {
     lga.value = selectedLga;
-    populateWards(selectedLga, @json(old('ward_id')));
+    populateWards(selectedLga, selectedWard);
   }
 }
 
-function populateWards(lgaKey, selectedWard = '') {
-  const selectedState = locations.find(item => item.state === state.value);
-  const selectedLga = selectedState?.lgas.find(item => item.lga === lgaKey);
+function populateWards(lgaId, selectedWard = '') {
+  const selectedState = states.find(item => item.id === state.value);
+  const selectedLga = selectedState?.lga?.find(item => item.id === lgaId);
   resetSelect(ward, 'Select Ward');
 
   if (!selectedLga) {
@@ -95,10 +96,11 @@ function populateWards(lgaKey, selectedWard = '') {
     return;
   }
 
-  populate(ward, selectedLga.wards, item => item, item => label(item));
+  const wards = selectedLga.ward || [];
+  populate(ward, wards, item => item.id, item => nameOf(item));
   ward.disabled = false;
 
-  if (selectedWard && selectedLga.wards.includes(selectedWard)) {
+  if (selectedWard && wards.some(item => item.id === selectedWard)) {
     ward.value = selectedWard;
   }
 }
@@ -115,23 +117,40 @@ async function loadLocations() {
 
     if (!response.ok) throw new Error('Unable to load location data');
 
-    locations = await response.json();
+    const json = await response.json();
+    states = Array.isArray(json) ? json : json.data;
+
+    if (!Array.isArray(states) || !states.length) {
+      throw new Error('Location data has an invalid structure');
+    }
 
     resetSelect(state, 'Select State');
-    populate(state, locations, item => item.state, item => label(item.state));
+    populate(state, states, item => item.id, item => nameOf(item));
     state.disabled = false;
 
     const oldState = @json(old('state_id'));
     const oldLga = @json(old('lga_id'));
     const oldWard = @json(old('ward_id'));
 
-    const defaultState = oldState || 'edo';
-    const defaultLga = oldLga || 'owan-east';
-    const defaultWard = oldWard || 'emai-1';
+    let defaultState = oldState;
+    let defaultLga = oldLga;
+    let defaultWard = oldWard;
 
-    if (locations.some(item => item.state === defaultState)) {
+    if (!defaultState) {
+      const edo = states.find(item => nameOf(item).toLowerCase() === 'edo');
+      defaultState = edo?.id || '';
+
+      if (edo) {
+        const owanEast = (edo.lga || []).find(item => nameOf(item).toLowerCase() === 'owan east');
+        defaultLga = owanEast?.id || '';
+        const emai = (owanEast?.ward || []).find(item => nameOf(item).toLowerCase() === 'emai 1');
+        defaultWard = emai?.id || '';
+      }
+    }
+
+    if (states.some(item => item.id === defaultState)) {
       state.value = defaultState;
-      populateLgas(defaultState, defaultLga);
+      populateLgas(defaultState, defaultLga, defaultWard);
     }
   } catch (error) {
     console.error(error);
