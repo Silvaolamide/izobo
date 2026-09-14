@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CampaignSetting;
 use App\Models\Lga;
 use App\Models\Registration;
 use App\Models\State;
@@ -14,7 +15,9 @@ class JoinController extends Controller
 {
     public function create()
     {
-        return view('join');
+        $whatsappGroupLink = CampaignSetting::getValue('whatsapp_group_link', '');
+
+        return view('join', compact('whatsappGroupLink'));
     }
 
     public function lgas(State $state)
@@ -66,29 +69,16 @@ class JoinController extends Controller
             return $name === $target || $name === $target . ' state' || Str::slug($item->name) === Str::slug($stateName);
         });
 
-        // Match administrative names robustly because the external location
-        // dataset may use Roman numerals while the registration database
-        // uses Arabic numerals (e.g. "Emai I" vs "EMAI 1").
         $normalizeLocationName = function ($name) {
             $name = Str::lower(trim((string) $name));
-
             $romanToArabic = [
-                '\\biii\\b' => '3',
-                '\\bii\\b' => '2',
-                '\\biv\\b' => '4',
-                '\\bv\\b' => '5',
-                '\\bvi\\b' => '6',
-                '\\bvii\\b' => '7',
-                '\\bviii\\b' => '8',
-                '\\bix\\b' => '9',
-                '\\bx\\b' => '10',
-                '\\bi\\b' => '1',
+                '\\biii\\b' => '3', '\\bii\\b' => '2', '\\biv\\b' => '4',
+                '\\bv\\b' => '5', '\\bvi\\b' => '6', '\\bvii\\b' => '7',
+                '\\bviii\\b' => '8', '\\bix\\b' => '9', '\\bx\\b' => '10', '\\bi\\b' => '1',
             ];
-
             foreach ($romanToArabic as $pattern => $replacement) {
                 $name = preg_replace('/' . $pattern . '/i', $replacement, $name);
             }
-
             return Str::slug($name);
         };
 
@@ -113,8 +103,6 @@ class JoinController extends Controller
 
         Registration::create($data);
 
-        return redirect()
-            ->route('join')
-            ->with('registration_complete', true);
+        return redirect()->route('join')->with('registration_complete', true);
     }
 }
