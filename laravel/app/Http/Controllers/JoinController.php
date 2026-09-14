@@ -43,29 +43,31 @@ class JoinController extends Controller
         $path = public_path('data/nigeria-locations.json');
         abort_unless(is_file($path), 500, 'Location data is unavailable.');
 
-        $locations = json_decode(file_get_contents($path), true);
-        abort_unless(is_array($locations), 500, 'Location data is invalid.');
+        $json = json_decode(file_get_contents($path), true);
+        abort_unless(is_array($json) && isset($json['data']) && is_array($json['data']), 500, 'Location data is invalid.');
 
         $stateKey = $data['state_id'];
         $lgaKey = $data['lga_id'];
         $wardKey = $data['ward_id'];
 
-        $selectedState = collect($locations)->firstWhere('state', $stateKey);
-        $selectedLga = collect($selectedState['lgas'] ?? [])->firstWhere('lga', $lgaKey);
-        $validWard = in_array($wardKey, $selectedLga['wards'] ?? [], true);
+        $selectedState = collect($json['data'])->firstWhere('id', $stateKey);
+        $selectedLga = collect($selectedState['lga'] ?? [])->firstWhere('id', $lgaKey);
+        $selectedWard = collect($selectedLga['ward'] ?? [])->firstWhere('id', $wardKey);
 
-        abort_unless($selectedState && $selectedLga && $validWard, 422, 'Please select a valid state, LGA and ward combination.');
+        abort_unless($selectedState && $selectedLga && $selectedWard, 422, 'Please select a valid state, LGA and ward combination.');
 
-        $state = State::whereRaw('LOWER(name) = ?', [strtolower(str_replace('-', ' ', $stateKey))])
-            ->orWhereRaw('LOWER(name) = ?', [strtolower($this->humanizeLocationKey($stateKey))])
-            ->first();
+        $stateName = $selectedState['name']['en'] ?? $selectedState['name']['local'] ?? '';
+        $lgaName = $selectedLga['name']['en'] ?? $selectedLga['name']['local'] ?? '';
+        $wardName = $selectedWard['name']['en'] ?? $selectedWard['name']['local'] ?? '';
 
-        if (!$state) {
-            $state = State::get()->first(fn ($item) => Str::slug($item->name) === $stateKey);
-        }
+        $state = State::get()->first(function ($item) use ($stateName) {
+            $name = Str::lower(trim($item->name));
+            $target = Str::lower(trim($stateName));
+            return $name === $target || $name === $target . ' state' || Str::slug($item->name) === Str::slug($stateName);
+        });
 
-        $lga = $state?->lgas()->get()->first(fn ($item) => Str::slug($item->name) === $lgaKey);
-        $ward = $lga?->wards()->get()->first(fn ($item) => Str::slug($item->name) === $wardKey);
+        $lga = $state?->lgas()->get()->first(fn ($item) => Str::slug($item->name) === Str::slug($lgaName));
+        $ward = $lga?->wards()->get()->first(fn ($item) => Str::slug($item->name) === Str::slug($wardName));
 
         abort_unless($state && $lga && $ward, 422, 'The selected location is not available in the registration database.');
 
@@ -81,10 +83,5 @@ class JoinController extends Controller
         Registration::create($data);
 
         return back()->with('success', 'Thank you. Your registration has been received.');
-    }
-
-    private function humanizeLocationKey(string $key): string
-    {
-        return str_replace('-', ' ', $key);
     }
 }
