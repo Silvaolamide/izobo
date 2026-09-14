@@ -1,0 +1,9 @@
+/vendor/
+.env
+.env.*
+!.env.example
+/storage/*.key
+/public/storage
+/public/hot
+/public/build
+.phpunit.result.cache
