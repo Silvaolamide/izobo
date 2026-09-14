@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
+use App\Models\CampaignSetting;
 use App\Models\Registration;
 use App\Models\State;
 use App\Models\Lga;
@@ -45,7 +46,27 @@ class AdminController extends Controller
         $daily = Registration::query()->selectRaw('DATE(created_at) as day, COUNT(*) as total')
             ->where('created_at','>=',now()->subDays(13))->groupBy('day')->orderBy('day')->get();
 
-        return view('admin.dashboard', compact('total','today','week','month','byLga','byWard','byInterest','daily'));
+        $whatsappGroupLink = CampaignSetting::getValue('whatsapp_group_link', '');
+
+        return view('admin.dashboard', compact('total','today','week','month','byLga','byWard','byInterest','daily','whatsappGroupLink'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $data = $request->validate([
+            'whatsapp_group_link' => [
+                'nullable',
+                'url',
+                'max:2048',
+                'regex:/^https:\/\/(chat\.whatsapp\.com\/|wa\.me\/)/i',
+            ],
+        ], [
+            'whatsapp_group_link.regex' => 'Please enter a valid WhatsApp group invitation link.',
+        ]);
+
+        CampaignSetting::setValue('whatsapp_group_link', trim($data['whatsapp_group_link'] ?? ''));
+
+        return redirect()->route('admin.dashboard')->with('settings_saved', 'Campaign settings updated successfully.');
     }
 
     public function logout(Request $request)
