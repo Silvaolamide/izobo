@@ -7,10 +7,12 @@
     <style>
         body { margin: 0; background: #f7f7f2; color: #10231c; font-family: Arial, sans-serif; }
         .wrap { width: min(1180px, calc(100% - 30px)); margin: auto; }
-        .head { padding: 25px 0; display: flex; justify-content: space-between; align-items: center; }
+        .head { padding: 25px 0; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         .brand { font-weight: 900; font-size: 22px; color: #075b40; }
         .brand span { color: #ef3037; }
         .logout { background: #ef3037; color: #fff; border: 0; border-radius: 999px; padding: 10px 16px; font-weight: 800; }
+        .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .view-link { display: inline-flex; align-items: center; text-decoration: none; background: #075b40; color: #fff; border-radius: 999px; padding: 10px 16px; font-size: 12px; font-weight: 800; }
         .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
         .card, .panel { background: #fff; border: 1px solid #e1e8e4; border-radius: 16px; padding: 22px; }
         .label { text-transform: uppercase; font-size: 10px; letter-spacing: .14em; color: #64736d; font-weight: 800; }
@@ -29,7 +31,7 @@
         .settings button { justify-self: start; border: 0; border-radius: 999px; padding: 11px 18px; background: #075b40; color: #fff; font-weight: 800; cursor: pointer; }
         .error { font-size: 12px; color: #a52229; margin-top: 6px; }
         @media (max-width: 800px) { .cards { grid-template-columns: 1fr 1fr; } .grid { grid-template-columns: 1fr; } }
-        @media (max-width: 500px) { .cards { grid-template-columns: 1fr; } .head { align-items: flex-start; gap: 15px; flex-direction: column; } }
+        @media (max-width: 500px) { .cards { grid-template-columns: 1fr; } .head { align-items: flex-start; flex-direction: column; } }
     </style>
 </head>
 <body>
@@ -40,10 +42,13 @@
                 <div class="note">Campaign registration overview</div>
             </div>
 
-            <form method="POST" action="{{ route('admin.logout') }}">
-                @csrf
-                <button class="logout">Sign out</button>
-            </form>
+            <div class="head-actions">
+                <a class="view-link" href="{{ route('admin.registrations') }}">View all signups</a>
+                <form method="POST" action="{{ route('admin.logout') }}">
+                    @csrf
+                    <button class="logout">Sign out</button>
+                </form>
+            </div>
         </header>
 
         <section class="cards">
@@ -173,7 +178,7 @@
         </section>
 
         <p class="note" style="margin:25px 0 50px">
-            Dashboard shows aggregate registration statistics. Personal contact details are intentionally not displayed here.
+            Dashboard shows aggregate registration statistics. Personal contact details are available on the protected signups page.
         </p>
     </div>
 </body>
