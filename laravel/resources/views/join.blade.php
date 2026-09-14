@@ -17,8 +17,7 @@
           <div style="font-size:42px;line-height:1;margin-bottom:18px">✓</div>
           <h2 style="font:800 30px/1.1 Manrope;margin:0 0 12px;color:var(--green)">You're already registered.</h2>
           <p class="muted" style="margin:0;max-width:580px">Thank you for registering your interest in supporting the IZOBO campaign. Your registration has been received by the campaign team.</p>
-          @php($whatsappGroupLink = \App\Models\CampaignSetting::getValue('whatsapp_group_link', ''))
-          @if($whatsappGroupLink)
+          @if(!empty($whatsappGroupLink))
             <a href="{{ $whatsappGroupLink }}" target="_blank" rel="noopener noreferrer" class="btn" style="display:inline-flex;justify-content:center;align-items:center;text-decoration:none;margin-top:24px">Join the IZOBO WhatsApp Group</a>
           @endif
         </div>
