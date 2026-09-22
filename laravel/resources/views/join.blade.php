@@ -35,7 +35,7 @@
             <div class="field"><label for="lga_id">LGA</label><select id="lga_id" name="lga_id" required disabled><option value="">Select LGA</option></select></div>
           </div>
           <div class="field"><label for="ward_id">Ward</label><select id="ward_id" name="ward_id" required disabled><option value="">Select Ward</option></select></div>
-          <div class="field"><label for="interest">How would you like to participate?</label><select id="interest" name="interest" required><option value="">Select one</option>@foreach(['Volunteer','Campaign supporter','Community outreach','Digital/media support','Other'] as $interest)<option @selected(old('interest')===$interest)>{{ $interest }}</option>@endforeach</select></div>
+          <div class="field"><label for="interest">How would you like to participate?</label><select id="interest" name="interest" required><option value="">Select one</option>@foreach(['Volunteer','Campaign supporter','Community outreach','Digital/media support','Ward Coordinator','Polling Unit Canverser','Other'] as $interest)<option @selected(old('interest')===$interest)>{{ $interest }}</option>@endforeach</select></div>
           <label style="display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:13px;line-height:1.5"><input type="checkbox" name="consent" value="1" required style="margin-top:3px"> I agree that the campaign team may use the information I submit for campaign coordination and communication.</label>
           @error('consent')<div class="error">{{ $message }}</div>@enderror
           <button class="btn" type="submit" style="width:100%;margin-top:24px">Register my interest</button>
