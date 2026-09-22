@@ -39,7 +39,7 @@ class JoinController extends Controller
             'state_id' => ['required','string','max:100'],
             'lga_id' => ['required','string','max:100'],
             'ward_id' => ['required','string','max:100'],
-            'interest' => ['required','in:Volunteer,Campaign supporter,Community outreach,Digital/media support,Other'],
+            'interest' => ['required','in:Volunteer,Campaign supporter,Community outreach,Digital/media support,Ward Coordinator,Polling Unit Canverser,Other'],
             'consent' => ['accepted'],
         ]);
 
