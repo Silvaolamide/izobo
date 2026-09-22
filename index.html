@@ -162,6 +162,41 @@
     .footer-brand small { display: block; color: #779189; font-family: "DM Sans"; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; margin-top: 5px }
     .footer-copy { font-size: 11px; text-align: right; line-height: 1.6 }
 
+
+    /* Floating WhatsApp contact */
+    .whatsapp-float {
+      position: fixed;
+      z-index: 120;
+      right: 22px;
+      bottom: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 18px 13px 14px;
+      border-radius: 999px;
+      background: #25d366;
+      color: #fff;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, .2);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .01em;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .whatsapp-float:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, .24);
+    }
+    .whatsapp-float-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, .18);
+      font-size: 17px;
+      line-height: 1;
+    }
+
     @media(max-width:900px) {
       .wrap { width: min(calc(100% - 32px), var(--max)) }
       .nav-links { display: none }
@@ -369,6 +404,12 @@
       </div>
     </section>
   </main>
+
+
+  <a class="whatsapp-float" href="https://wa.me/2348036726620?text=Hello%2C%20I%20would%20like%20to%20make%20an%20enquiry%20or%20discuss%20sponsorship." target="_blank" rel="noopener noreferrer" aria-label="For Enquiries or Sponsorship on WhatsApp">
+    <span class="whatsapp-float-icon" aria-hidden="true">◔</span>
+    <span>For Enquiries/Sponsorship</span>
+  </a>
 
   <footer>
     <div class="wrap footer-grid">
