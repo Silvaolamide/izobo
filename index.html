@@ -93,6 +93,32 @@
     .identity-cell strong { font-family: Manrope; font-size: 25px; line-height: 1.05; margin-top: 10px; letter-spacing: -.04em }
     .identity-cell small { font-size: 12px; color: var(--muted); margin-top: 7px; line-height: 1.5 }
 
+    /* Responsive candidate feature */
+    .mobile-candidate {
+      display: none;
+      position: relative;
+      margin-top: 74px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: var(--green-deep);
+      box-shadow: 0 22px 55px rgba(5, 56, 40, .16);
+      isolation: isolate;
+    }
+    .mobile-candidate img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      height: auto;
+      object-fit: cover;
+      object-position: center 18%;
+    }
+    .mobile-candidate:after {
+      content: "";
+      position: absolute;
+      inset: 45% 0 0;
+      background: linear-gradient(to bottom, transparent, rgba(3, 45, 32, .62));
+      pointer-events: none;
+    }
+
     /* Sections */
     section.standard { padding: 125px 0 }
     .section-head { max-width: 730px }
@@ -157,6 +183,10 @@
       .identity { margin-top: -65px }
       .identity-card { grid-template-columns: 1fr 1fr }
       .identity-main { grid-column: 1/-1 }
+      .mobile-candidate {
+        display: block;
+        margin-top: 56px;
+      }
       .story { grid-template-columns: 1fr; gap: 30px }
       .story-number { font-size: 120px }
       .value-grid { grid-template-columns: 1fr }
@@ -190,6 +220,14 @@
       .identity-cell { border-left: 0; border-top: 1px solid var(--line); padding: 25px 28px }
       .identity-cell strong { font-size: 22px }
       .identity-cell small { font-size: 11px }
+      .mobile-candidate {
+        margin-top: 42px;
+        border-radius: 20px;
+      }
+      .mobile-candidate img {
+        aspect-ratio: 4 / 5;
+        object-position: center 12%;
+      }
       section.standard { padding: 85px 0 }
       .section-title { font-size: 46px }
       .lead { font-size: 15px }
@@ -260,6 +298,12 @@
             Constituency</small></div>
       </div>
     </section>
+
+    <div class="wrap">
+      <div class="mobile-candidate">
+        <img src="assets/candidate.jpg" alt="Moses Ohileebo campaign portrait" loading="lazy">
+      </div>
+    </div>
 
     <section class="standard" id="about">
       <div class="wrap">
